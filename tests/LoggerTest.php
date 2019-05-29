@@ -20,6 +20,9 @@ class LoggerTest extends TestCase
     /** @var \Monolog\Logger */
     private $monolog;
 
+    /** @var \Illuminate\Contracts\Config\Repository */
+    private $config;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -31,6 +34,8 @@ class LoggerTest extends TestCase
 
         $this->logger = $this->app->make(Logger::class);
         $this->monolog = ($this->logger)(['level' => 'INFO', 'url' => 'http://example.com']);
+
+        $this->config = $this->app['config'];
     }
 
     /** @test */
@@ -84,6 +89,7 @@ class LoggerTest extends TestCase
         $this->discordFake->assertLastMessageMatches([
             'embeds'   => [
                 'title' => 'wer',
+                'color' => $this->config->get('discord-logger.colors.WARNING')
             ],
         ]);
     }

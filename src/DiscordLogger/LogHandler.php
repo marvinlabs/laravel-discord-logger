@@ -2,8 +2,9 @@
 
 namespace MarvinLabs\DiscordLogger;
 
-use Illuminate\Config\Repository;
+use Illuminate\Contracts\Config\Repository;
 use MarvinLabs\DiscordLogger\Contracts\DiscordWebHook;
+use MarvinLabs\DiscordLogger\Discord\Embed;
 use MarvinLabs\DiscordLogger\Discord\Message;
 use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\Logger as Monolog;
@@ -13,7 +14,7 @@ class LogHandler extends AbstractProcessingHandler
     /** @var \MarvinLabs\DiscordLogger\Contracts\DiscordWebHook */
     private $discord;
 
-    /** @var \Illuminate\Config\Repository */
+    /** @var \Illuminate\Contracts\Config\Repository */
     private $config;
 
     /** @var \MarvinLabs\DiscordLogger\Discord\Message|null */
@@ -34,25 +35,24 @@ class LogHandler extends AbstractProcessingHandler
         $this->newMessage()
             ->messageContent($record)
             ->messageFrom($record)
+            ->mainMessageEmbed($record)
             ->send();
     }
 
-    protected function newMessage(): LogHandler
+    protected function mainMessageEmbed(array $record): LogHandler
     {
-        $this->currentMessage = Message::make();
-        return $this;
-    }
+        $this->currentMessage->embed(Embed::make()
+            ->color($this->config->get('discord-logger.colors', [])[$record['level_name']] ?? 0x666666)
+            ->field('level', $record['level_name']));
 
-    protected function send(): void
-    {
-        $this->discord->send($this->currentMessage);
-        $this->currentMessage = null;
+        return $this;
     }
 
     protected function messageContent(array $record): LogHandler
     {
         $appName = $this->config->get('app.name', 'laravel');
         $timestamp = $record['datetime']->format('Y-m-d H:i:s');
+
         $this->currentMessage->content("[$timestamp] $appName.{$record['level_name']}");
 
         return $this;
@@ -79,5 +79,17 @@ class LogHandler extends AbstractProcessingHandler
     protected function getFromAvatar(): ?string
     {
         return $this->config->get('discord-logger.from.avatar_url');
+    }
+
+    protected function newMessage(): LogHandler
+    {
+        $this->currentMessage = Message::make();
+        return $this;
+    }
+
+    protected function send(): void
+    {
+        $this->discord->send($this->currentMessage);
+        $this->currentMessage = null;
     }
 }

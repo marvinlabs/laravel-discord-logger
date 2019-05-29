@@ -2,7 +2,7 @@
 
 namespace MarvinLabs\DiscordLogger;
 
-use Illuminate\Config\Repository;
+use Illuminate\Contracts\Config\Repository;
 use Illuminate\Contracts\Container\Container;
 use InvalidArgumentException;
 use MarvinLabs\DiscordLogger\Contracts\DiscordWebHook;
@@ -10,7 +10,7 @@ use Monolog\Logger as Monolog;
 
 class Logger
 {
-    /** @var \Illuminate\Config\Repository */
+    /** @var \Illuminate\Contracts\Config\Repository */
     private $config;
 
     /** @var \Illuminate\Contracts\Container\Container */
