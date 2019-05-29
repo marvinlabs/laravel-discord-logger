@@ -2,12 +2,24 @@
 
 namespace MarvinLabs\DiscordLogger\Tests\Discord;
 
+use Illuminate\Support\Str;
+use MarvinLabs\DiscordLogger\Contracts\DiscordWebHook;
 use MarvinLabs\DiscordLogger\Discord\Embed;
 use MarvinLabs\DiscordLogger\Discord\Message;
 use MarvinLabs\DiscordLogger\Tests\TestCase;
 
 class MessageTest extends TestCase
 {
+    /** @test */
+    public function content_is_truncated_to_2000_characters()
+    {
+        $longString = Str::random(DiscordWebHook::MAX_CONTENT_LENGTH + 500);
+
+        $message = Message::make()->content($longString);
+
+        $this->assertLessThanOrEqual(DiscordWebHook::MAX_CONTENT_LENGTH, strlen($message->content));
+    }
+
     /** @test */
     public function can_convert_to_array()
     {

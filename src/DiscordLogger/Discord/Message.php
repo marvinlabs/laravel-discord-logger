@@ -3,6 +3,8 @@
 namespace MarvinLabs\DiscordLogger\Discord;
 
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Support\Str;
+use MarvinLabs\DiscordLogger\Contracts\DiscordWebHook;
 
 class Message implements Arrayable
 {
@@ -40,7 +42,7 @@ class Message implements Arrayable
 
     public function content(string $content): Message
     {
-        $this->content = $content;
+        $this->content = Str::limit($content, DiscordWebHook::MAX_CONTENT_LENGTH - 3 /* Accounting for ellipsis */);
         return $this;
     }
 
