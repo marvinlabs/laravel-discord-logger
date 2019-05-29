@@ -100,6 +100,12 @@ Of course, you can send your log messages to multiple Discord channels. Just cre
 `config/logging.php` and put them in the stack. Each channel should be named differently and should point to a different
 web hook URL.
 
+## What does it look like?
+
+You can get a preview of what it looks like using each of the provided converters.
+
+![Screenshot](/assets/screenshot.png)
+
 ## Version history
 
 See the [dedicated change log](CHANGELOG.md)
