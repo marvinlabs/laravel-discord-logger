@@ -2,6 +2,9 @@
 
 return [
 
+    /*
+     * A set of colors to associate to the different log levels
+     */
     'colors' => [
         'DEBUG'     => 0x607d8b,
         'INFO'      => 0x4caf50,
@@ -13,4 +16,11 @@ return [
         'EMERGENCY' => 0x9c27b0,
     ],
 
+    /*
+     * The default
+     */
+    'from'   => [
+        'name'   => env('APP_NAME', 'Discord Logger'),
+        'avatar_url' => null,
+    ],
 ];
