@@ -3,7 +3,7 @@
 namespace MarvinLabs\DiscordLogger\Tests\Discord;
 
 use GuzzleHttp\Client as HttpClient;
-use MarvinLabs\DiscordLogger\Discord\Client;
+use MarvinLabs\DiscordLogger\Discord\GuzzleWebHook;
 use MarvinLabs\DiscordLogger\Discord\Embed;
 use MarvinLabs\DiscordLogger\Discord\Message;
 use MarvinLabs\DiscordLogger\Tests\TestCase;
@@ -11,13 +11,13 @@ use MarvinLabs\DiscordLogger\Tests\TestCase;
 /** @group RequiresNetwork */
 class LiveClientTest extends TestCase
 {
-    /** @var \MarvinLabs\DiscordLogger\Discord\Client */
+    /** @var \MarvinLabs\DiscordLogger\Discord\GuzzleWebHook */
     private $client;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->client = new Client(new HttpClient(), config('logging.channels.discord.url'));
+        $this->client = new GuzzleWebHook(new HttpClient(), config('logging.channels.discord.url'));
     }
 
     /** @test */

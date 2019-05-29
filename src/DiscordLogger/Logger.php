@@ -2,23 +2,29 @@
 
 namespace MarvinLabs\DiscordLogger;
 
+use Illuminate\Config\Repository;
+use Illuminate\Contracts\Container\Container;
+use MarvinLabs\DiscordLogger\Contracts\DiscordWebHook;
 use Monolog\Logger as Monolog;
 
-/**
- * Class TelegramLogger
- *
- * @package App\Logging
- */
 class Logger
 {
-    /**
-     * Create a custom Monolog instance.
-     *
-     * @param array $config
-     * @return \Monolog\Logger
-     */
+    /** @var \Illuminate\Config\Repository */
+    private $config;
+    /** @var \Illuminate\Contracts\Container\Container */
+    private $container;
+
+    public function __construct(Container $container, Repository $config)
+    {
+        $this->config = $config;
+        $this->container = $container;
+    }
+
     public function __invoke(array $config)
     {
-        return new Monolog(config('app.name'), [new LogHandler($config['webhook_url'], $config['level'])]);
+        $discord = $this->container->make(DiscordWebHook::class, [$config['webhook_url']]);
+
+        return new Monolog($this->config->get('app.name'), [
+            new LogHandler($this->config, $discord, $config['level'])]);
     }
 }

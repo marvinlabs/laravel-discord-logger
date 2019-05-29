@@ -2,33 +2,27 @@
 
 namespace MarvinLabs\DiscordLogger;
 
+use Illuminate\Config\Repository;
+use MarvinLabs\DiscordLogger\Contracts\DiscordWebHook;
+use MarvinLabs\DiscordLogger\Discord\Message;
 use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\Logger as Monolog;
 
 class LogHandler extends AbstractProcessingHandler
 {
-    /** @var string */
-    private $appName;
+    /** @var \MarvinLabs\DiscordLogger\Contracts\DiscordWebHook */
+    private $discord;
 
-    /** @var string */
-    private $appEnv;
+    /** @var \Illuminate\Config\Repository */
+    private $config;
 
-    /** @var string */
-    private $webHookUrl;
-
-    public function __construct(string $webHookUrl, int $level)
+    public function __construct(Repository $config, DiscordWebHook $discord, int $level)
     {
         parent::__construct(Monolog::toMonologLevel($level));
 
         $this->level = $level;
-        $this->webHookUrl = $webHookUrl;
-
-        // define variables for making Telegram request
-        $this->botToken = config('telegram-logger.token');
-        $this->chatId = config('telegram-logger.chat_id');
-        // define variables for text message
-        $this->appName = config('app.name');
-        $this->appEnv = config('app.env');
+        $this->discord = $discord;
+        $this->config = $config;
     }
 
     /**
@@ -36,5 +30,11 @@ class LogHandler extends AbstractProcessingHandler
      */
     public function write(array $record)
     {
+        $this->appName = $this->config->get('app.name', 'My Application');
+        $this->appEnv = $this->config->get('app.env', 'local');
+
+        $this->discord->send(Message::make()
+            ->content($this->config->get('app.name', 'My Application') . ' / ' . $this->config->get('app.env',
+                    'local')));
     }
 }

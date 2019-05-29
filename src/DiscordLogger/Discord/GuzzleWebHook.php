@@ -5,11 +5,11 @@ namespace MarvinLabs\DiscordLogger\Discord;
 use Exception;
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Exception\ClientException;
-use MarvinLabs\DiscordLogger\Contracts\DiscordClient;
+use MarvinLabs\DiscordLogger\Contracts\DiscordWebHook;
 use MarvinLabs\DiscordLogger\Discord\Exceptions\InvalidMessage;
 use MarvinLabs\DiscordLogger\Discord\Exceptions\MessageCouldNotBeSent;
 
-class Client implements DiscordClient
+class GuzzleWebHook implements DiscordWebHook
 {
     /** @var \GuzzleHttp\Client */
     protected $http;
@@ -21,6 +21,11 @@ class Client implements DiscordClient
     {
         $this->http = $http;
         $this->url = $url;
+    }
+
+    public function getUrl(): string
+    {
+        return $this->url;
     }
 
     /**
