@@ -3,6 +3,8 @@
 namespace MarvinLabs\DiscordLogger\Discord;
 
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Support\Str;
+use MarvinLabs\DiscordLogger\Contracts\DiscordWebHook;
 
 class Message implements Arrayable
 {
@@ -40,7 +42,7 @@ class Message implements Arrayable
 
     public function content(string $content): Message
     {
-        $this->content = $content;
+        $this->content = Str::limit($content, DiscordWebHook::MAX_CONTENT_LENGTH - 3 /* Accounting for ellipsis */);
         return $this;
     }
 
@@ -56,7 +58,7 @@ class Message implements Arrayable
 
     public function tts(bool $enabled = true): Message
     {
-        $this->tts = $enabled ? 'true' : 'false';
+        $this->tts = $enabled;
         return $this;
     }
 
@@ -78,18 +80,22 @@ class Message implements Arrayable
 
     public function toArray(): array
     {
-        return ['content'   => $this->content,
-                'username'  => $this->username,
-                'avatarUrl' => $this->avatarUrl,
-                'tts'       => $this->tts ? 'true' : 'false',
-                'file'      => $this->file,
-                'embeds'    => $this->serializeEmbeds(),];
+        return array_filter(
+            ['content'    => $this->content,
+             'username'   => $this->username,
+             'avatar_url' => $this->avatarUrl,
+             'tts'        => $this->tts ? 'true' : 'false',
+             'file'       => $this->file,
+             'embeds'     => $this->serializeEmbeds(),],
+            static function ($value) {
+                return $value !== null && $value !== [];
+            });
     }
 
     protected function serializeEmbeds(): array
     {
         return array_map(static function (Arrayable $embed) {
             return $embed->toArray();
-        }, $this->embeds);
+        }, $this->embeds ?? []);
     }
 }

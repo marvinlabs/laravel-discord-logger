@@ -3,6 +3,8 @@
 namespace MarvinLabs\DiscordLogger\Discord;
 
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Support\Str;
+use MarvinLabs\DiscordLogger\Contracts\DiscordWebHook;
 
 class Embed implements Arrayable
 {
@@ -52,7 +54,8 @@ class Embed implements Arrayable
 
     public function description(string $description): Embed
     {
-        $this->description = $description;
+        $this->description = Str::limit($description,
+            DiscordWebHook::MAX_CONTENT_LENGTH - 3 /* Accounting for ellipsis */);
         return $this;
     }
 
@@ -103,23 +106,27 @@ class Embed implements Arrayable
 
     public function toArray(): array
     {
-        return [
-            'title'       => $this->title,
-            'description' => $this->description,
-            'url'         => $this->url,
-            'color'       => $this->color,
-            'footer'      => $this->footer,
-            'image'       => $this->image,
-            'thumbnail'   => $this->thumbnail,
-            'author'      => $this->author,
-            'fields'      => $this->serializeFields(),
-        ];
+        return array_filter(
+            [
+                'title'       => $this->title,
+                'description' => $this->description,
+                'url'         => $this->url,
+                'color'       => $this->color,
+                'footer'      => $this->footer,
+                'image'       => $this->image,
+                'thumbnail'   => $this->thumbnail,
+                'author'      => $this->author,
+                'fields'      => $this->serializeFields(),
+            ],
+            static function ($value) {
+                return $value !== null && $value !== [];
+            });
     }
 
     protected function serializeFields(): array
     {
         return array_map(static function (Arrayable $field) {
             return $field->toArray();
-        }, $this->fields);
+        }, $this->fields ?? []);
     }
 }

@@ -1,4 +1,4 @@
-# Laravel Luhn
+# Laravel Discord Logger
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/marvinlabs/laravel-discord-logger.svg?style=flat-square)](https://packagist.org/packages/marvinlabs/laravel-discord-logger)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
@@ -48,9 +48,9 @@ You must add a new channel to your `config/logging.php` file:
     //...
     'discord' => [
         'driver' => 'custom',
-        'via'    => Marvinlabs\DiscordLogger\Logger::class,
+        'via'    => MarvinLabs\DiscordLogger\Logger::class,
         'level'  => 'debug',
-        'url'    => env('LOG_DISCORD_WEBHOOK_URL', null),
+        'url'    => env('LOG_DISCORD_WEBHOOK_URL'),
     ],
 ];
 ```
@@ -99,6 +99,12 @@ LOG_CHANNEL=stack
 Of course, you can send your log messages to multiple Discord channels. Just create as many channels as desired in 
 `config/logging.php` and put them in the stack. Each channel should be named differently and should point to a different
 web hook URL.
+
+## What does it look like?
+
+You can get a preview of what it looks like using each of the provided converters.
+
+![Screenshot](/assets/screenshot.png)
 
 ## Version history
 
