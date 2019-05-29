@@ -9,7 +9,7 @@ use MarvinLabs\DiscordLogger\Discord\Message;
 use MarvinLabs\DiscordLogger\Tests\TestCase;
 
 /** @group RequiresNetwork */
-class ClientTest extends TestCase
+class LiveClientTest extends TestCase
 {
     /** @var \MarvinLabs\DiscordLogger\Discord\Client */
     private $client;
