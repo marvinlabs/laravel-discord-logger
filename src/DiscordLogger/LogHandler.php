@@ -31,7 +31,10 @@ class LogHandler extends AbstractProcessingHandler
 
     public function write(array $record)
     {
-        $this->discord->send($this->recordToMessage->buildMessage($record));
+        foreach($this->recordToMessage->buildMessages($record) as $message)
+        {
+            $this->discord->send($message);
+        }
     }
 
     /** @throws \Illuminate\Contracts\Container\BindingResolutionException */

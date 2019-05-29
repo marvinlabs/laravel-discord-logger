@@ -5,7 +5,7 @@ namespace MarvinLabs\DiscordLogger\Converters;
 use MarvinLabs\DiscordLogger\Discord\Exceptions\ConfigurationIssue;
 use MarvinLabs\DiscordLogger\Discord\Message;
 
-class SimpleRecordConverter extends AbstractRecordConverter
+class RichRecordConverter extends AbstractRecordConverter
 {
     /**
      * @throws \MarvinLabs\DiscordLogger\Discord\Exceptions\ConfigurationIssue
@@ -15,18 +15,19 @@ class SimpleRecordConverter extends AbstractRecordConverter
         $message = Message::make();
 
         $this->addGenericMessageFrom($message);
-        $this->addMessageContent($message, $record);
+
+        $this->addMainEmbed($message, $record);
         $this->addMessageStacktrace($message, $record);
 
         return [$message];
     }
 
-    protected function addMessageContent(Message $message, array $record): void
+    protected function addMainEmbed(Message $message, array $record): void
     {
-        $content = $record['formatted'] ?? '';
+        $title = $record['formatted'] ?? '';
         $emoji = $this->getRecordEmoji($record);
 
-        $message->content($emoji === null ? "`$content`" : "$emoji `$content`");
+        $message->embed();
     }
 
     /**

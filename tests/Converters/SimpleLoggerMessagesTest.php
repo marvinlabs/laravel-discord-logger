@@ -20,7 +20,7 @@ class SimpleLoggerMessagesTest extends AbstractLoggerMessagesTest
     {
         $this->config->set('discord-logger.emojis.WARNING', ':poop:');
 
-        $message = $this->warning('This is a test');
+        $message = $this->warning('This is a test')[0];
 
         MessageAssertions::assertMessagePartialMatch([
             'content' => ":poop: `[2000-01-01 12:13:14] Laravel.WARNING: This is a test [] []\n`",
@@ -32,7 +32,7 @@ class SimpleLoggerMessagesTest extends AbstractLoggerMessagesTest
     {
         $this->config->set('discord-logger.emojis.WARNING', null);
 
-        $message = $this->warning('This is a test');
+        $message = $this->warning('This is a test')[0];
 
         MessageAssertions::assertMessagePartialMatch([
             'content' => "`[2000-01-01 12:13:14] Laravel.WARNING: This is a test [] []\n`",
@@ -45,7 +45,7 @@ class SimpleLoggerMessagesTest extends AbstractLoggerMessagesTest
         $this->config->set('discord-logger.stacktrace', 'inline');
 
         $exception = new Exception();
-        $message =   $this->exception('This is a test', $exception);
+        $message =   $this->exception('This is a test', $exception)[0];
 
         $this->assertStringContainsString('[2000-01-01 12:13:14] Laravel.CRITICAL: This is a test', $message->content);
         $this->assertStringContainsString($exception->getTraceAsString(), $message->content);
@@ -57,7 +57,7 @@ class SimpleLoggerMessagesTest extends AbstractLoggerMessagesTest
         $this->config->set('discord-logger.stacktrace', 'file');
 
         $exception = new Exception();
-        $message =   $this->exception('This is a test', $exception);
+        $message =   $this->exception('This is a test', $exception)[0];
 
         $this->assertStringContainsString('[2000-01-01 12:13:14] Laravel.CRITICAL: This is a test', $message->content);
 

@@ -34,7 +34,7 @@ abstract class AbstractLoggerMessagesTest extends TestCase
         $this->config->set('discord-logger.from.name', 'John');
         $this->config->set('discord-logger.from.avatar_url', 'http://example.com/avatar.png');
 
-        $message = $this->warning('This is a test');
+        $message = $this->warning('This is a test')[0];
 
         MessageAssertions::assertMessagePartialMatch([
             'username'   => 'John',
@@ -42,15 +42,15 @@ abstract class AbstractLoggerMessagesTest extends TestCase
         ], $message);
     }
 
-    protected function warning(string $message, array $context = [], array $extras = []): Message
+    protected function warning(string $message, array $context = [], array $extras = []): array
     {
-        return $this->converter->buildMessage(
+        return $this->converter->buildMessages(
             $this->fakeRecord(Logger::WARNING, $message, $context, $extras));
     }
 
-    protected function exception(string $message, Throwable $exception): Message
+    protected function exception(string $message, Throwable $exception): array
     {
-        return $this->converter->buildMessage(
+        return $this->converter->buildMessages(
             $this->fakeRecord(Logger::CRITICAL, $message, ['exception' => $exception]));
     }
 
