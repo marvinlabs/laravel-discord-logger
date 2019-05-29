@@ -6,7 +6,7 @@ use MarvinLabs\DiscordLogger\Discord\Embed;
 use MarvinLabs\DiscordLogger\Discord\Message;
 use MarvinLabs\DiscordLogger\Tests\TestCase;
 
-class EmbedTest extends TestCase
+class MessageTest extends TestCase
 {
     /** @test */
     public function can_convert_to_array()
@@ -15,7 +15,7 @@ class EmbedTest extends TestCase
             ->title('my title', 'main.url')
             ->author('John', 'avatar.url', 'author-icon.url')
             ->description('my description')
-            ->color('#123456')
+            ->color(0x123456)
             ->image('image.url')
             ->thumbnail('thumbnail.url')
             ->field('first-field', 'foo', true)
