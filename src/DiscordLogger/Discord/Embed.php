@@ -120,6 +120,6 @@ class Embed implements Arrayable
     {
         return array_map(static function (Arrayable $field) {
             return $field->toArray();
-        }, $this->fields);
+        }, $this->fields ?? []);
     }
 }

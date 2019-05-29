@@ -25,19 +25,41 @@ class MessageTest extends TestCase
         $message = Message::make()
             ->content('my content')
             ->from('John', 'avatar.url')
-            ->tts(true)
+            ->tts()
             ->embed($embed)
             ->file('file content', 'example.txt');
 
         $this->assertEquals(
-            ['content'   => 'my content',
-             'username'  => 'John',
-             'avatarUrl' => 'avatar.url',
-             'tts'       => 'true',
-             'file'      => ['name'     => 'file',
-                             'contents' => 'file content',
-                             'filename' => 'example.txt',],
-             'embeds'    => [$embed->toArray(),],
+            ['content'    => 'my content',
+             'username'   => 'John',
+             'avatar_url' => 'avatar.url',
+             'tts'        => true,
+             'file'       => ['name'     => 'file',
+                              'contents' => 'file content',
+                              'filename' => 'example.txt',],
+             'embeds'     => [$embed->toArray(),],
+            ],
+            $message->toArray());
+    }
+
+    /** @test */
+    public function can_convert_message_without_embeds_to_array()
+    {
+        $message = Message::make()
+            ->content('my content')
+            ->from('John', 'avatar.url')
+            ->tts(false)
+            ->file('file content', 'example.txt');
+
+        $this->assertEquals(
+            ['content'    => 'my content',
+             'username'   => 'John',
+             'avatar_url' => 'avatar.url',
+             'tts'        => false,
+             'file'       => ['name'     => 'file',
+                              'contents' => 'file content',
+                              'filename' => 'example.txt',],
+             'embeds'     => [],
             ],
             $message->toArray());
     }

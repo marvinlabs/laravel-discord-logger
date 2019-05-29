@@ -56,7 +56,7 @@ class Message implements Arrayable
 
     public function tts(bool $enabled = true): Message
     {
-        $this->tts = $enabled ? 'true' : 'false';
+        $this->tts = $enabled;
         return $this;
     }
 
@@ -78,18 +78,18 @@ class Message implements Arrayable
 
     public function toArray(): array
     {
-        return ['content'   => $this->content,
-                'username'  => $this->username,
-                'avatarUrl' => $this->avatarUrl,
-                'tts'       => $this->tts ? 'true' : 'false',
-                'file'      => $this->file,
-                'embeds'    => $this->serializeEmbeds(),];
+        return ['content'    => $this->content,
+                'username'   => $this->username,
+                'avatar_url' => $this->avatarUrl,
+                'tts'        => $this->tts,
+                'file'       => $this->file,
+                'embeds'     => $this->serializeEmbeds(),];
     }
 
     protected function serializeEmbeds(): array
     {
         return array_map(static function (Arrayable $embed) {
             return $embed->toArray();
-        }, $this->embeds);
+        }, $this->embeds ?? []);
     }
 }
