@@ -78,12 +78,16 @@ class Message implements Arrayable
 
     public function toArray(): array
     {
-        return ['content'    => $this->content,
-                'username'   => $this->username,
-                'avatar_url' => $this->avatarUrl,
-                'tts'        => $this->tts,
-                'file'       => $this->file,
-                'embeds'     => $this->serializeEmbeds(),];
+        return array_filter(
+            ['content'    => $this->content,
+             'username'   => $this->username,
+             'avatar_url' => $this->avatarUrl,
+             'tts'        => $this->tts ? 'true' : 'false',
+             'file'       => $this->file,
+             'embeds'     => $this->serializeEmbeds(),],
+            static function ($value) {
+                return $value !== null && $value !== [];
+            });
     }
 
     protected function serializeEmbeds(): array

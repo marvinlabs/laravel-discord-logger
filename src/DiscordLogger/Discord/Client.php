@@ -29,10 +29,11 @@ class Client
     public function send(Message $message): void
     {
         $payload = $this->buildPayload($message);
-
+        $requestType = $this->requestType($message);
+//dd($payload);
         try
         {
-            $this->http->post($this->url, ['json' => $payload]);
+            $this->http->post($this->url, [$requestType => $payload]);
         }
         catch (ClientException $e)
         {
@@ -40,8 +41,13 @@ class Client
         }
         catch (Exception $e)
         {
-            throw MessageCouldNotBeSent::couldNotCommunicateWithDiscord($e->getMessage());
+            throw MessageCouldNotBeSent::couldNotCommunicateWithDiscord($e);
         }
+    }
+
+    protected function requestType(Message $message): string
+    {
+        return $message->file !== null ? 'multipart' : 'json';
     }
 
     /**
@@ -54,7 +60,48 @@ class Client
             throw InvalidMessage::cannotSendAnEmptyMessage();
         }
 
-        return $message->toArray();
+        if ($this->requestType($message) === 'multipart')
+        {
+            return $this->buildMultipartPayload($message);
+        }
+
+        return $this->buildJsonPayload($message);
+    }
+
+    /**
+     * @throws \MarvinLabs\DiscordLogger\Discord\Exceptions\InvalidMessage
+     */
+    protected function buildJsonPayload(Message $message): array
+    {
+        if ($this->isMessageEmpty($message))
+        {
+            throw InvalidMessage::cannotSendAnEmptyMessage();
+        }
+
+        return collect($message->toArray())->forget('file')->all();
+    }
+
+    /**
+     * @throws \MarvinLabs\DiscordLogger\Discord\Exceptions\InvalidMessage
+     */
+    protected function buildMultipartPayload(Message $message): array
+    {
+        if ($message->embeds !== null)
+        {
+            throw InvalidMessage::embedsNotSupportedWithFileUploads();
+        }
+
+        return collect($message->toArray())
+            ->forget('file')
+            ->reject(static function ($value) {
+                return $value === null;
+            })
+            ->map(static function ($value, $key) {
+                return ['name' => $key, 'contents' => $value];
+            })
+            ->push($message->file)
+            ->values()
+            ->all();
     }
 
     protected function isMessageEmpty($message): bool

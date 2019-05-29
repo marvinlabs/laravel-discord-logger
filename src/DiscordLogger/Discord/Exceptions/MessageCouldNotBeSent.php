@@ -4,6 +4,7 @@ namespace MarvinLabs\DiscordLogger\Discord\Exceptions;
 
 use Exception;
 use GuzzleHttp\Exception\ClientException;
+use Throwable;
 
 class MessageCouldNotBeSent extends Exception
 {
@@ -18,8 +19,8 @@ class MessageCouldNotBeSent extends Exception
     }
 
     /** Thrown when the api is not reachable. */
-    public static function couldNotCommunicateWithDiscord(?string $message): MessageCouldNotBeSent
+    public static function couldNotCommunicateWithDiscord(Throwable $e): MessageCouldNotBeSent
     {
-        return new static("The communication with Discord Web hook failed. Reason: {$message}");
+        return new static('The communication with Discord Web hook failed.', $e->getCode(), $e);
     }
 }

@@ -33,7 +33,7 @@ class MessageTest extends TestCase
             ['content'    => 'my content',
              'username'   => 'John',
              'avatar_url' => 'avatar.url',
-             'tts'        => true,
+             'tts'        => 'true',
              'file'       => ['name'     => 'file',
                               'contents' => 'file content',
                               'filename' => 'example.txt',],
@@ -55,11 +55,10 @@ class MessageTest extends TestCase
             ['content'    => 'my content',
              'username'   => 'John',
              'avatar_url' => 'avatar.url',
-             'tts'        => false,
+             'tts'        => 'false',
              'file'       => ['name'     => 'file',
                               'contents' => 'file content',
                               'filename' => 'example.txt',],
-             'embeds'     => [],
             ],
             $message->toArray());
     }

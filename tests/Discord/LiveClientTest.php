@@ -30,7 +30,8 @@ class LiveClientTest extends TestCase
     /** @test */
     public function can_send_a_message_with_file()
     {
-        $this->client->send(Message::make('This is a test with a file')->file('testing 1, 2, 3', 'example.txt'));
+        $this->client->send(Message::make('This is a test with a file')
+            ->file('This is the content of the file', 'example.txt'));
         $this->expectNotToPerformAssertions();
     }
 
