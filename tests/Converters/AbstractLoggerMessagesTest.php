@@ -4,7 +4,6 @@ namespace MarvinLabs\DiscordLogger\Tests\Converters;
 
 use DateTime;
 use MarvinLabs\DiscordLogger\Contracts\RecordToMessage;
-use MarvinLabs\DiscordLogger\Discord\Message;
 use MarvinLabs\DiscordLogger\Tests\Support\MessageAssertions;
 use MarvinLabs\DiscordLogger\Tests\TestCase;
 use Monolog\Logger;
@@ -54,7 +53,7 @@ abstract class AbstractLoggerMessagesTest extends TestCase
             $this->fakeRecord(Logger::CRITICAL, $message, ['exception' => $exception]));
     }
 
-    protected function fakeRecord(string $level, string $message, array $context = [], array $extras = []): array
+    protected function fakeRecord(string $level, string $message, array $context = [], array $extra = []): array
     {
         $timestamp = DateTime::createFromFormat('Y-m-d H:i:s', '2000-01-01 12:13:14');
         $serializedContext = json_encode($context);
@@ -65,10 +64,11 @@ abstract class AbstractLoggerMessagesTest extends TestCase
         return [
             'message'    => $message,
             'level'      => $level,
+            'channel'    => 'Laravel',
             'level_name' => $levelName,
             'datetime'   => $timestamp,
             'formatted'  => $formatted,
-            'extra'      => $extras,
+            'extra'      => $extra,
             'context'    => $context,
         ];
     }

@@ -2,6 +2,8 @@
 
 namespace MarvinLabs\DiscordLogger\Converters;
 
+use Illuminate\Support\Arr;
+use MarvinLabs\DiscordLogger\Discord\Embed;
 use MarvinLabs\DiscordLogger\Discord\Exceptions\ConfigurationIssue;
 use MarvinLabs\DiscordLogger\Discord\Message;
 
@@ -12,82 +14,81 @@ class RichRecordConverter extends AbstractRecordConverter
      */
     public function buildMessages(array $record): array
     {
-        $message = Message::make();
+        $mainMessage = Message::make();
 
-        $this->addGenericMessageFrom($message);
+        $this->addGenericMessageFrom($mainMessage);
+        $this->addMainEmbed($mainMessage, $record);
+        $this->addContextEmbed($mainMessage, $record);
+        $this->addExtrasEmbed($mainMessage, $record);
 
-        $this->addMainEmbed($message, $record);
-        $this->addMessageStacktrace($message, $record);
+        $stackTraceMessage = null;
+        $stacktrace = $this->getStacktrace($record);
+        if ($stacktrace !== null)
+        {
+            switch ($this->stackTraceMode($stacktrace))
+            {
+                case 'file':
+                    // Discord webhooks do not support EMBED + FILE at the same time. Hence another message has to be sent
+                    $stackTraceMessage = Message::make()->file($stacktrace, $this->getStacktraceFilename($record));
+                    $this->addGenericMessageFrom($stackTraceMessage);
+                    break;
 
-        return [$message];
+                case 'inline' :
+                    $this->addInlineMessageStacktrace($mainMessage, $record, $stacktrace);
+                    break;
+
+                default:
+                    throw new ConfigurationIssue('Invalid value for configuration `discord-logger.stacktrace`');
+            }
+        }
+
+        return $stackTraceMessage !== null ? [$mainMessage, $stackTraceMessage] : [$mainMessage];
     }
 
     protected function addMainEmbed(Message $message, array $record): void
     {
-        $title = $record['formatted'] ?? '';
+        $timestamp = $record['datetime']->format('Y-m-d H:i:s');
+        $title = "`[$timestamp] {$record['channel']}.{$record['level_name']}`";
+        $description = $record['message'];
         $emoji = $this->getRecordEmoji($record);
 
-        $message->embed();
+        $message->embed(Embed::make()
+            ->color($this->getRecordColor($record))
+            ->title($emoji === null ? "`$title`" : "$emoji `$title`")
+            ->description($emoji === null ? "`$description`" : ":black_small_square: `$description`"));
     }
 
-    /**
-     * @throws \MarvinLabs\DiscordLogger\Discord\Exceptions\ConfigurationIssue
-     */
-    protected function addMessageStacktrace(Message $message, array $record): void
+    protected function addContextEmbed(Message $message, array $record): void
     {
-        $stacktrace = $this->getStacktrace($record);
-        if ($stacktrace === null)
+        $context = Arr::except($record['context'] ?? [], ['exception']);
+        if (empty($context))
         {
             return;
         }
 
-        switch ($this->stackTraceMode($stacktrace))
-        {
-            case 'file':
-                $message->file($stacktrace, $this->getStacktraceFilename($record));
-                break;
-
-            case 'inline' :
-                $message->content($message->content . "\n\n`" . $stacktrace . '`');
-                break;
-
-            default:
-                throw new ConfigurationIssue('Invalid value for configuration `discord-logger.stacktrace`');
-        }
+        $message->embed(Embed::make()
+            ->color($this->getRecordColor($record))
+            ->description("**Context**\n`" . json_encode($context, JSON_PRETTY_PRINT) . '`'));
     }
 
-//    protected function mainMessageEmbed(array $record): LogHandler
-//    {
-//        $message = Str::limit($record['message'], 2000);
-//
-//        $timestamp = $record['datetime']->format('Y-m-d H:i:s');
-//
-//        $this->currentMessage->embed(Embed::make()
-//            ->title("`[$timestamp] {$record['channel']}.{$record['level_name']}`")
-//            ->description("`{$message}`")
-//            ->color($this->getRecordColor($record)));
-//
-//        return $this;
-//    }
-//
-//    protected function exceptionEmbed(array $record): LogHandler
-//    {
-//        if (empty($record['context'])
-//            || empty($record['context']['exception'])
-//            || !is_a($record['context']['exception'], Throwable::class))
-//        {
-//            return $this;
-//        }
-//
-//        /** @var \Throwable $exception */
-//        $exception = $record['context']['exception'];
-//
-//        $traceAsString = Str::limit($exception->getTraceAsString(), 2000);
-//
-//        $this->currentMessage->embed(Embed::make()
-//            ->description("`$traceAsString`")
-//            ->color($this->getRecordColor($record)));
-//
-//        return $this;
-//    }
+    protected function addExtrasEmbed(Message $message, array $record): void
+    {
+        $extras = $record['extra'] ?? [];
+        if (empty($extras))
+        {
+            return;
+        }
+
+        $message->embed(Embed::make()
+            ->color($this->getRecordColor($record))
+            ->description("**Extra**\n`" . json_encode($extras, JSON_PRETTY_PRINT) . '`'));
+    }
+
+    protected function addInlineMessageStacktrace(Message $message, array $record, string $stacktrace): void
+    {
+        $message->embed(Embed::make()
+            ->color($this->getRecordColor($record))
+            ->title('Stacktrace')
+            ->description("`$stacktrace`"));
+    }
 }
