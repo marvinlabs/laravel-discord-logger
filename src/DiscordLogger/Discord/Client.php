@@ -5,10 +5,11 @@ namespace MarvinLabs\DiscordLogger\Discord;
 use Exception;
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Exception\ClientException;
+use MarvinLabs\DiscordLogger\Contracts\DiscordClient;
 use MarvinLabs\DiscordLogger\Discord\Exceptions\InvalidMessage;
 use MarvinLabs\DiscordLogger\Discord\Exceptions\MessageCouldNotBeSent;
 
-class Client
+class Client implements DiscordClient
 {
     /** @var \GuzzleHttp\Client */
     protected $http;
@@ -30,7 +31,7 @@ class Client
     {
         $payload = $this->buildPayload($message);
         $requestType = $this->requestType($message);
-//dd($payload);
+
         try
         {
             $this->http->post($this->url, [$requestType => $payload]);
