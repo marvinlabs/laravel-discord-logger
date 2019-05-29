@@ -36,6 +36,11 @@ class FakeDiscordWebHook implements DiscordWebHook
         return $this->url;
     }
 
+    public function getLastMessageSent(): ?Message
+    {
+        return $this->lastMessageSent;
+    }
+
     public function assertNothingSent()
     {
         Assert::assertCount(0, $this->sentMessages);

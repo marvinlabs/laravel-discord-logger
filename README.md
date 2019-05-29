@@ -48,9 +48,9 @@ You must add a new channel to your `config/logging.php` file:
     //...
     'discord' => [
         'driver' => 'custom',
-        'via'    => Marvinlabs\DiscordLogger\Logger::class,
+        'via'    => MarvinLabs\DiscordLogger\Logger::class,
         'level'  => 'debug',
-        'url'    => env('LOG_DISCORD_WEBHOOK_URL', null),
+        'url'    => env('LOG_DISCORD_WEBHOOK_URL'),
     ],
 ];
 ```

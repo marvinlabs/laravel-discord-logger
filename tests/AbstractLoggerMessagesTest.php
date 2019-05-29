@@ -2,24 +2,24 @@
 
 namespace MarvinLabs\DiscordLogger\Tests;
 
-use DateTime;
-use InvalidArgumentException;
 use MarvinLabs\DiscordLogger\Contracts\DiscordWebHook;
 use MarvinLabs\DiscordLogger\Logger;
 use MarvinLabs\DiscordLogger\Tests\Support\FakeDiscordWebHook;
-use RuntimeException;
 
-class LoggerTest extends TestCase
+abstract class AbstractLoggerMessagesTest extends TestCase
 {
 
     /** @var \MarvinLabs\DiscordLogger\Tests\Support\FakeDiscordWebHook */
-    private $discordFake;
+    protected $discordFake;
 
     /** @var \MarvinLabs\DiscordLogger\Logger */
-    private $logger;
+    protected $logger;
 
     /** @var \Monolog\Logger */
-    private $monolog;
+    protected $monolog;
+
+    /** @var \Illuminate\Contracts\Config\Repository */
+    protected $config;
 
     protected function setUp(): void
     {
@@ -32,21 +32,21 @@ class LoggerTest extends TestCase
 
         $this->logger = $this->app->make(Logger::class);
         $this->monolog = ($this->logger)(['level' => 'INFO', 'url' => 'http://example.com']);
+
+        $this->config = $this->app['config'];
     }
 
     /** @test */
-    public function throws_exception_if_url_missing_from_channel_configuration()
+    public function message_is_sent_with_expected_from_fields()
     {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('You must set the `url` key in your discord channel configuration');
+        $this->config->set('discord-logger.from.name', 'John');
+        $this->config->set('discord-logger.from.avatar_url', 'http://example.com/avatar.png');
 
-        ($this->logger)([]);
-    }
-
-    /** @test */
-    public function log_is_sent_to_discord()
-    {
         $this->monolog->warn('This is a test');
-        $this->discordFake->assertSendCount(1);
+
+        $this->discordFake->assertLastMessageMatches([
+            'username'   => 'John',
+            'avatar_url' => 'http://example.com/avatar.png',
+        ]);
     }
 }

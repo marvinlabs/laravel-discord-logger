@@ -5,7 +5,6 @@ namespace MarvinLabs\DiscordLogger;
 use Illuminate\Contracts\Config\Repository;
 use Illuminate\Contracts\Container\Container;
 use InvalidArgumentException;
-use MarvinLabs\DiscordLogger\Contracts\DiscordWebHook;
 use Monolog\Logger as Monolog;
 
 class Logger
@@ -36,9 +35,6 @@ class Logger
     /** @throws \Illuminate\Contracts\Container\BindingResolutionException */
     protected function newDiscordLogHandler(array $config): LogHandler
     {
-        $discord = $this->container->make(DiscordWebHook::class, ['url' => $config['url']]);
-        $level = $config['level'] ?? Monolog::DEBUG;
-
-        return new LogHandler($this->config, $discord, $level);
+        return new LogHandler($this->container, $this->config, $config);
     }
 }

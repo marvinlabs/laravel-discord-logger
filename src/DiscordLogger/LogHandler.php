@@ -3,93 +3,49 @@
 namespace MarvinLabs\DiscordLogger;
 
 use Illuminate\Contracts\Config\Repository;
+use Illuminate\Contracts\Container\Container;
 use MarvinLabs\DiscordLogger\Contracts\DiscordWebHook;
-use MarvinLabs\DiscordLogger\Discord\Embed;
-use MarvinLabs\DiscordLogger\Discord\Message;
+use MarvinLabs\DiscordLogger\Contracts\RecordToMessage;
+use MarvinLabs\DiscordLogger\Converters\SimpleRecordConverter;
 use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\Logger as Monolog;
+use RuntimeException;
+use function class_implements;
 
 class LogHandler extends AbstractProcessingHandler
 {
     /** @var \MarvinLabs\DiscordLogger\Contracts\DiscordWebHook */
     private $discord;
 
-    /** @var \Illuminate\Contracts\Config\Repository */
-    private $config;
+    /** @var \MarvinLabs\DiscordLogger\Contracts\RecordToMessage */
+    private $recordToMessage;
 
-    /** @var \MarvinLabs\DiscordLogger\Discord\Message|null */
-    private $currentMessage;
-
-    public function __construct(Repository $config, DiscordWebHook $discord, string $level)
+    /** @throws \Illuminate\Contracts\Container\BindingResolutionException */
+    public function __construct(Container $container, Repository $config, array $channelConfig)
     {
-        parent::__construct(Monolog::toMonologLevel($level));
+        parent::__construct(Monolog::toMonologLevel($channelConfig['level'] ?? Monolog::DEBUG));
 
-        $this->level = $level;
-        $this->discord = $discord;
-        $this->config = $config;
+        $this->discord = $container->make(DiscordWebHook::class, ['url' => $channelConfig['url']]);
+        $this->recordToMessage = $this->createRecordConverter($container, $config);
     }
 
     public function write(array $record)
     {
-//        dd($record);
-        $this->newMessage()
-            ->messageContent($record)
-            ->messageFrom($record)
-            ->mainMessageEmbed($record)
-            ->send();
+        $this->discord->send($this->recordToMessage->buildMessage($record));
     }
 
-    protected function mainMessageEmbed(array $record): LogHandler
+    /** @throws \Illuminate\Contracts\Container\BindingResolutionException */
+    protected function createRecordConverter(Container $container, Repository $config): RecordToMessage
     {
-        $this->currentMessage->embed(Embed::make()
-            ->color($this->config->get('discord-logger.colors', [])[$record['level_name']] ?? 0x666666)
-            ->field('level', $record['level_name']));
+        $converter = $container->make(
+            $config->get('discord-logger.converter', SimpleRecordConverter::class));
 
-        return $this;
-    }
-
-    protected function messageContent(array $record): LogHandler
-    {
-        $appName = $this->config->get('app.name', 'laravel');
-        $timestamp = $record['datetime']->format('Y-m-d H:i:s');
-
-        $this->currentMessage->content("[$timestamp] $appName.{$record['level_name']}");
-
-        return $this;
-    }
-
-    protected function messageFrom(array $record): LogHandler
-    {
-        $name = $this->getFromName();
-        if ($name === null)
+        if (!class_implements($converter, RecordToMessage::class))
         {
-            return $this;
+            throw new RuntimeException('The converter specified in the discord-logger configuration should implement the RecordToMessage interface');
         }
 
-        $this->currentMessage->from($name, $this->getFromAvatar());
-
-        return $this;
+        return $converter;
     }
 
-    protected function getFromName(): string
-    {
-        return $this->config->get('discord-logger.from.name');
-    }
-
-    protected function getFromAvatar(): ?string
-    {
-        return $this->config->get('discord-logger.from.avatar_url');
-    }
-
-    protected function newMessage(): LogHandler
-    {
-        $this->currentMessage = Message::make();
-        return $this;
-    }
-
-    protected function send(): void
-    {
-        $this->discord->send($this->currentMessage);
-        $this->currentMessage = null;
-    }
 }
