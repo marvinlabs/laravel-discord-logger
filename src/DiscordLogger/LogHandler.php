@@ -29,7 +29,7 @@ class LogHandler extends AbstractProcessingHandler
         $this->recordToMessage = $this->createRecordConverter($container, $config);
     }
 
-    public function write(array $record)
+    public function write(array $record): void
     {
         foreach($this->recordToMessage->buildMessages($record) as $message)
         {
