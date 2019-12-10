@@ -14,14 +14,20 @@ class ServiceProvider extends BaseServiceProvider
     /** @return void */
     public function register()
     {
-        $this->mergeConfigFrom(__DIR__ . '/../../config/discord-logger.php', 'discord-logger');
+        if (!str_contains($this->app->version(), 'Lumen')) {
+            $this->mergeConfigFrom(__DIR__ . '/../../config/discord-logger.php', 'discord-logger');
+        }
         $this->registerContainerBindings();
     }
 
     /** @return void */
     public function boot()
     {
-        $this->publishes([__DIR__ . '/../../config/discord-logger.php' => config_path('discord-logger.php')], 'config');
+        if (str_contains($this->app->version(), 'Lumen')) {
+            $this->app->configure('discord-logger');
+        } else {
+            $this->publishes([__DIR__ . '/../../config/discord-logger.php' => config_path('discord-logger.php')], 'config');
+        }
     }
 
     protected function registerContainerBindings(): void
