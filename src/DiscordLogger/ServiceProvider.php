@@ -8,13 +8,14 @@ use Illuminate\Contracts\Container\Container;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use MarvinLabs\DiscordLogger\Contracts\DiscordWebHook;
 use MarvinLabs\DiscordLogger\Discord\GuzzleWebHook;
+use Illuminate\Support\Str;
 
 class ServiceProvider extends BaseServiceProvider
 {
     /** @return void */
     public function register()
     {
-        if (!str_contains($this->app->version(), 'Lumen')) {
+        if (!Str::contains($this->app->version(), 'Lumen')) {
             $this->mergeConfigFrom(__DIR__ . '/../../config/discord-logger.php', 'discord-logger');
         }
         $this->registerContainerBindings();
@@ -23,7 +24,7 @@ class ServiceProvider extends BaseServiceProvider
     /** @return void */
     public function boot()
     {
-        if (str_contains($this->app->version(), 'Lumen')) {
+        if (Str::contains($this->app->version(), 'Lumen')) {
             $this->app->configure('discord-logger');
         } else {
             $this->publishes([__DIR__ . '/../../config/discord-logger.php' => config_path('discord-logger.php')], 'config');
