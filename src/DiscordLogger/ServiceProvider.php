@@ -15,7 +15,7 @@ class ServiceProvider extends BaseServiceProvider
     /** @return void */
     public function register()
     {
-        if (!Str::contains($this->app->version(), 'Lumen')) {
+        if (!str_contains($this->app->version(), 'Lumen')) {
             $this->mergeConfigFrom(__DIR__ . '/../../config/discord-logger.php', 'discord-logger');
         }
         $this->registerContainerBindings();
@@ -24,7 +24,7 @@ class ServiceProvider extends BaseServiceProvider
     /** @return void */
     public function boot()
     {
-        if (Str::contains($this->app->version(), 'Lumen')) {
+        if (str_contains($this->app->version(), 'Lumen')) {
             $this->app->configure('discord-logger');
         } else {
             $this->publishes([__DIR__ . '/../../config/discord-logger.php' => config_path('discord-logger.php')], 'config');
