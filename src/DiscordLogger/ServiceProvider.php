@@ -8,6 +8,7 @@ use Illuminate\Contracts\Container\Container;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use MarvinLabs\DiscordLogger\Contracts\DiscordWebHook;
 use MarvinLabs\DiscordLogger\Discord\GuzzleWebHook;
+use Illuminate\Support\Str;
 
 class ServiceProvider extends BaseServiceProvider
 {

@@ -93,7 +93,7 @@ abstract class AbstractRecordConverter implements RecordToMessage
         $message->from($name, $this->getFromAvatar());
     }
 
-    protected function getFromName(): string
+    protected function getFromName(): ?string
     {
         return $this->config->get('discord-logger.from.name');
     }
