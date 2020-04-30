@@ -44,7 +44,7 @@ class GuzzleWebHookTest extends TestCase
 
         tap($this->httpHistory[0]['request'], function (Request $request) {
             $this->assertEquals('POST', $request->getMethod());
-            $this->assertEquals('application/json', $request->getHeader('Content-Type'));
+            $this->assertEquals('application/json', $request->getHeader('Content-Type')[0]);
 
             $payload = json_decode($request->getBody()->getContents(), true);
             $this->assertEquals('No files attached', $payload['content']);

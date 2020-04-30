@@ -48,7 +48,7 @@ class RichRecordConverter extends AbstractRecordConverter
     protected function addMainEmbed(Message $message, array $record): void
     {
         $timestamp = $record['datetime']->format('Y-m-d H:i:s');
-        $title = "`[$timestamp] {$record['channel']}.{$record['level_name']}`";
+        $title = "[$timestamp] {$record['channel']}.{$record['level_name']}";
         $description = $record['message'];
         $emoji = $this->getRecordEmoji($record);
 

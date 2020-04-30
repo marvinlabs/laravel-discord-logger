@@ -46,7 +46,7 @@ class LoggerTest extends TestCase
     /** @test */
     public function log_is_sent_to_discord()
     {
-        $this->monolog->warn('This is a test');
+        $this->monolog->warning('This is a test');
         $this->discordFake->assertSendCount(1);
     }
 }

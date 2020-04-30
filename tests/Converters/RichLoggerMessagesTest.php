@@ -27,7 +27,7 @@ class RichLoggerMessagesTest extends AbstractLoggerMessagesTest
         MessageAssertions::assertMessagePartialMatch([
             'embeds' => [
                 0 => ['title'       => ':poop: `[2000-01-01 12:13:14] Laravel.WARNING`',
-                      'description' => ':speech_balloon: `This is a test`',
+                      'description' => ':black_small_square: `This is a test`',
                       'color'       => 0x123456],
                 1 => ['description' => "**Context**\n`" . json_encode(['foo' => 'bar'], JSON_PRETTY_PRINT) . '`',
                       'color'       => 0x123456,],
