@@ -20,6 +20,9 @@ class LogHandler extends AbstractProcessingHandler
     /** @var \MarvinLabs\DiscordLogger\Contracts\RecordToMessage */
     private $recordToMessage;
 
+    /** @var boolean */
+    private $allowedSendMessage = false;
+
     /** @throws \Illuminate\Contracts\Container\BindingResolutionException */
     public function __construct(Container $container, Repository $config, array $channelConfig)
     {
@@ -27,10 +30,16 @@ class LogHandler extends AbstractProcessingHandler
 
         $this->discord = $container->make(DiscordWebHook::class, ['url' => $channelConfig['url']]);
         $this->recordToMessage = $this->createRecordConverter($container, $config);
+        $this->allowedSendMessage = $this->checkAllowedSendMessage(
+            $container->environment(),
+            $this->getAllowedEnvironmentsByChannelConfig($channelConfig)
+        );
     }
 
     public function write(array $record): void
     {
+        if(! $this->allowedSendMessage) return;
+        
         foreach($this->recordToMessage->buildMessages($record) as $message)
         {
             $this->discord->send($message);
@@ -51,4 +60,20 @@ class LogHandler extends AbstractProcessingHandler
         return $converter;
     }
 
+    protected function getAllowedEnvironmentsByChannelConfig(array $channelConfig)
+    {
+        $allowedEnv = $channelConfig['env'] ?? [];
+
+        if(is_string($allowedEnv))
+        {
+            return [$allowedEnv];
+        }
+
+        return $allowedEnv;
+    }
+
+    protected function checkAllowedSendMessage(string $appEnvironment, array $allowedEnvironments)
+    {
+        return in_array($appEnvironment, $allowedEnvironments);
+    }
 }
