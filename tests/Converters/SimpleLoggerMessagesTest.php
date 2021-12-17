@@ -40,6 +40,18 @@ class SimpleLoggerMessagesTest extends AbstractLoggerMessagesTest
     }
 
     /** @test */
+    public function includes_error_filename_and_line()
+    {
+        $this->config->set('discord-logger.stacktrace', 'inline');
+
+        $exception = new Exception();
+        $message =   $this->exception('This is a test', $exception)[0];
+
+        $this->assertStringContainsString($exception->getFile(), $message->content);
+        $this->assertStringContainsString($exception->getLine(), $message->content);
+    }
+
+    /** @test */
     public function includes_stacktrace_in_content_when_attachment_disabled()
     {
         $this->config->set('discord-logger.stacktrace', 'inline');
@@ -62,8 +74,8 @@ class SimpleLoggerMessagesTest extends AbstractLoggerMessagesTest
         $this->assertStringContainsString('[2000-01-01 12:13:14] Laravel.CRITICAL: This is a test', $message->content);
 
         MessageAssertions::assertMessagePartialMatch([
-            'file' => ['filename' => '20000101121314_stacktrace.txt',
-                       'contents' => $exception->getTraceAsString(),],
+            'file' => ['filename' => '20000101121314_stacktrace.txt'],
         ], $message);
+        $this->assertStringContainsString($exception->getTraceAsString(), $message->file['contents']);
     }
 }

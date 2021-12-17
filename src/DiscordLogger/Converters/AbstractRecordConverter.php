@@ -55,9 +55,7 @@ abstract class AbstractRecordConverter implements RecordToMessage
 
     protected function getStacktrace(array $record): ?string
     {
-        if (empty($record['context'])
-            || empty($record['context']['exception'])
-            || !is_a($record['context']['exception'], Throwable::class))
+        if (!is_a($record['context']['exception'] ?? '', Throwable::class))
         {
             return null;
         }
@@ -65,7 +63,9 @@ abstract class AbstractRecordConverter implements RecordToMessage
         /** @var \Throwable $exception */
         $exception = $record['context']['exception'];
 
-        return $exception->getTraceAsString();
+        return "On {$exception->getFile()}:{$exception->getLine()} (code {$exception->getCode()})\n" .
+            "Stacktrace:\n" .
+            $exception->getTraceAsString();
     }
 
     protected function getRecordColor(array $record): int
