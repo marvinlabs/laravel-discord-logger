@@ -88,7 +88,7 @@ class RichRecordConverter extends AbstractRecordConverter
     {
         $message->embed(Embed::make()
             ->color($this->getRecordColor($record))
-            ->title('Stacktrace')
+            ->title('Exception')
             ->description("`$stacktrace`"));
     }
 }

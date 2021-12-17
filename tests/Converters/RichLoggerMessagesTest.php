@@ -38,6 +38,18 @@ class RichLoggerMessagesTest extends AbstractLoggerMessagesTest
     }
 
     /** @test */
+    public function includes_error_filename_and_line()
+    {
+        $this->config->set('discord-logger.stacktrace', 'inline');
+
+        $exception = new Exception();
+        $message =   $this->exception('This is a test', $exception)[0];
+
+        $this->assertStringContainsString($exception->getFile(), $message->embeds[1]->description);
+        $this->assertStringContainsString($exception->getLine(), $message->embeds[1]->description);
+    }
+
+    /** @test */
     public function includes_stacktrace_in_content_when_attachment_disabled()
     {
         $this->config->set('discord-logger.stacktrace', 'inline');
@@ -68,8 +80,8 @@ class RichLoggerMessagesTest extends AbstractLoggerMessagesTest
         ], $messages[0]);
 
         MessageAssertions::assertMessagePartialMatch([
-            'file' => ['filename' => '20000101121314_stacktrace.txt',
-                       'contents' => $exception->getTraceAsString(),],
+            'file' => ['filename' => '20000101121314_stacktrace.txt'],
         ], $messages[1]);
+        $this->assertStringContainsString($exception->getTraceAsString(), $messages[1]->file['contents']);
     }
 }
