@@ -32,7 +32,8 @@ class EmbedTest extends TestCase
             ->thumbnail('thumbnail.url')
             ->field('first-field', 'foo', true)
             ->field('second-field', 'bar', false)
-            ->footer('my footer', 'footer-icon.url');
+            ->footer('my footer', 'footer-icon.url')
+            ->timestamp('2000-01-01T12:13:14.000Z');
 
         $this->assertEquals(
             ['title'       => 'my title',
@@ -52,6 +53,7 @@ class EmbedTest extends TestCase
                                ['name'   => 'second-field',
                                 'value'  => 'bar',
                                 'inline' => false,],],
+             'timestamp'   => '2000-01-01T12:13:14.000Z',
             ],
             $embed->toArray());
     }
