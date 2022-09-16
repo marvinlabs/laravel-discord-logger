@@ -35,6 +35,9 @@ class Embed implements Arrayable
     /** @var array */
     public $fields;
 
+    /** @var string */
+    public $timestamp;
+
     /** Static factory method */
     public static function make(): Embed
     {
@@ -104,6 +107,12 @@ class Embed implements Arrayable
         return $this;
     }
 
+    public function timestamp(string $timestamp): Embed
+    {
+        $this->timestamp = $timestamp;
+        return $this;
+    }
+
     public function toArray(): array
     {
         return array_filter(
@@ -117,6 +126,7 @@ class Embed implements Arrayable
                 'thumbnail'   => $this->thumbnail,
                 'author'      => $this->author,
                 'fields'      => $this->serializeFields(),
+                'timestamp'   => $this->timestamp,
             ],
             static function ($value) {
                 return $value !== null && $value !== [];
