@@ -129,7 +129,7 @@ class Embed implements Arrayable
                 'timestamp'   => $this->timestamp,
             ],
             static function ($value) {
-                return $value !== null && $value !== [];
+                return $value !== null && $value !== "" && $value !== [];
             });
     }
 
