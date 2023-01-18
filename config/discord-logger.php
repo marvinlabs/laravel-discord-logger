@@ -6,7 +6,7 @@ return [
      * The author of the log messages. You can set both to null to keep the Webhook author set in Discord
      */
     'from'       => [
-        'name'       => env('APP_NAME', 'Discord Logger'),
+        'name'       => env('APP_NAME', 'Laravel Logger'),
         'avatar_url' => null,
     ],
 
