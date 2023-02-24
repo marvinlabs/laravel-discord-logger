@@ -9,6 +9,7 @@ use MarvinLabs\DiscordLogger\Contracts\RecordToMessage;
 use MarvinLabs\DiscordLogger\Converters\SimpleRecordConverter;
 use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\Logger as Monolog;
+use Monolog\LogRecord;
 use RuntimeException;
 use function class_implements;
 
@@ -20,6 +21,9 @@ class LogHandler extends AbstractProcessingHandler
     /** @var \MarvinLabs\DiscordLogger\Contracts\RecordToMessage */
     private $recordToMessage;
 
+    /** @var boolean */
+    private $ignoreExceptions;
+
     /** @throws \Illuminate\Contracts\Container\BindingResolutionException */
     public function __construct(Container $container, Repository $config, array $channelConfig)
     {
@@ -27,13 +31,23 @@ class LogHandler extends AbstractProcessingHandler
 
         $this->discord = $container->make(DiscordWebHook::class, ['url' => $channelConfig['url']]);
         $this->recordToMessage = $this->createRecordConverter($container, $config);
+
+        $this->ignoreExceptions = $channelConfig['ignore_exceptions'] ?? false;
     }
 
-    public function write(array $record): void
+    public function write(array|LogRecord $record): void
     {
-        foreach($this->recordToMessage->buildMessages($record) as $message)
-        {
-            $this->discord->send($message);
+        if ($record instanceof LogRecord) {
+            $record =  $record->toArray();
+        }
+        foreach($this->recordToMessage->buildMessages($record) as $message) {
+            try {
+                $this->discord->send($message);
+            } catch (\Exception $e) {
+                if (!$this->ignoreExceptions) {
+                    throw $e;
+                }
+            }
         }
     }
 

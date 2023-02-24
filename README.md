@@ -51,6 +51,7 @@ You must add a new channel to your `config/logging.php` file:
         'via'    => MarvinLabs\DiscordLogger\Logger::class,
         'level'  => 'debug',
         'url'    => env('LOG_DISCORD_WEBHOOK_URL'),
+        'ignore_exceptions' => env('LOG_DISCORD_IGNORE_EXCEPTIONS', false),
     ],
 ];
 ```
