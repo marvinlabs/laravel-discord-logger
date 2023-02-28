@@ -9,7 +9,6 @@ use MarvinLabs\DiscordLogger\Contracts\RecordToMessage;
 use MarvinLabs\DiscordLogger\Converters\SimpleRecordConverter;
 use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\Logger as Monolog;
-use Monolog\LogRecord;
 use RuntimeException;
 use function class_implements;
 
@@ -30,10 +29,8 @@ class LogHandler extends AbstractProcessingHandler
         $this->recordToMessage = $this->createRecordConverter($container, $config);
     }
 
-    public function write(LogRecord $record): void
+    public function write(array $record): void
     {
-        $record = $record->toArray();
-
         foreach($this->recordToMessage->buildMessages($record) as $message)
         {
             $this->discord->send($message);
