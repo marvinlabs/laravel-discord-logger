@@ -3,6 +3,7 @@
 namespace MarvinLabs\DiscordLogger\Converters;
 
 use Illuminate\Support\Arr;
+use MarvinLabs\DiscordLogger\Contracts\DiscordWebHook;
 use MarvinLabs\DiscordLogger\Discord\Embed;
 use MarvinLabs\DiscordLogger\Discord\Exceptions\ConfigurationIssue;
 use MarvinLabs\DiscordLogger\Discord\Message;
@@ -20,17 +21,17 @@ class RichRecordConverter extends AbstractRecordConverter
         $this->addMainEmbed($mainMessage, $record);
         $this->addContextEmbed($mainMessage, $record);
         $this->addExtrasEmbed($mainMessage, $record);
-
-        $stackTraceMessage = null;
+        $fileMessage = null;
         $stacktrace = $this->getStacktrace($record);
+
         if ($stacktrace !== null)
         {
             switch ($this->stackTraceMode($stacktrace))
             {
                 case 'file':
                     // Discord webhooks do not support EMBED + FILE at the same time. Hence another message has to be sent
-                    $stackTraceMessage = Message::make()->file($stacktrace, $this->getStacktraceFilename($record));
-                    $this->addGenericMessageFrom($stackTraceMessage);
+                    $fileMessage = Message::make()->file($stacktrace, $this->getStacktraceFilename($record));
+                    $this->addGenericMessageFrom($fileMessage);
                     break;
 
                 case 'inline' :
@@ -41,8 +42,13 @@ class RichRecordConverter extends AbstractRecordConverter
                     throw new ConfigurationIssue('Invalid value for configuration `discord-logger.stacktrace`');
             }
         }
+        elseif (strlen($record['message']) > DiscordWebHook::MAX_CONTENT_LENGTH)
+        {
+            $fileMessage = Message::make()->file($record['message'], $this->getStacktraceFilename($record));
+            $this->addGenericMessageFrom($fileMessage);
+        }
 
-        return $stackTraceMessage !== null ? [$mainMessage, $stackTraceMessage] : [$mainMessage];
+        return $fileMessage !== null ? [$mainMessage, $fileMessage] : [$mainMessage];
     }
 
     protected function addMainEmbed(Message $message, array $record): void
