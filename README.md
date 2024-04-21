@@ -107,6 +107,23 @@ You can get a preview of what it looks like using each of the provided converter
 
 ![Screenshot](/assets/screenshot.png)
 
+## The communication with Discord Web hook failed
+You might encounter this exception alongside "cURL error 60: SSL certificate problem: unable to get local issuer certificate" while using/testing your web hook in a development enviroment. This occurs due to your local machine's inability to verify the server's SSL certificate.
+
+### To resolve this issue, follow these steps:
+
+- Obtain the cacert.pem file from the curl website.
+
+- Store the cacert.pem file in a secure location on your computer, such as C:\xampp\php\extras\ssl\cacert.pem.
+
+- Access your php.ini file, typically found in your PHP installation directory.
+
+- Locate curl.cainfo = in php.ini. If it's commented out (begins with a ;), remove the semicolon.
+
+- Insert the path to cacert.pem you saved earlier. Example: curl.cainfo = "C:\xampp\php\extras\ssl\cacert.pem".
+
+- Save the php.ini file and restart your server to implement the changes.
+
 ## Version history
 
 See the [dedicated change log](CHANGELOG.md)
